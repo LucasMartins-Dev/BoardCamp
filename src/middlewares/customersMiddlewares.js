@@ -1,4 +1,4 @@
-import { customerSchema } from "../models/customersModel.js";
+import { customerSchema } from "../schemas/customersSchema.js";
 import { connectionDB } from "../database/database.js";
 
 export async function customerSchemaValidation(req, res, next){
