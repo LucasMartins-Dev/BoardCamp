@@ -1,7 +1,7 @@
 
 import gamesRoutes from "./routes/gamesRoutes.js";
 import customersRoutes from "./routes/customersRoutes.js";
-
+import rentalsRoutes from "./routes/rentalsRoutes.js";
 
 import express from 'express';
 import cors from 'cors';
@@ -14,6 +14,8 @@ app.use(cors());
 
 app.use(gamesRoutes);
 app.use(customersRoutes);
+app.use(rentalsRoutes);
+
 
 
 
