@@ -19,10 +19,10 @@ export async function getGames(req,res){
 
 export async function postGames(req,res){
     const game = res.locals.game;
-    const {name, image, stockTotal, pricePerDay} = game;
+    const {name, stockTotal, pricePerDay, image} = game;
 
     try{
-        const games = await connectionDB.query(`INSERT INTO games (name, image, "stockTotal", "categoryId", "pricePerDay") VALUES ($1, $2, $3, $4, $5);`,[name,image,stockTotal,pricePerDay]);  
+        const games = await connectionDB.query(`INSERT INTO games (name,"stockTotal", "pricePerDay", image) VALUES ($1, $2, $3, $4);`,[name,stockTotal,pricePerDay,image]);  
         return res.sendStatus(201);
     }catch(err){
         console.log(err);
