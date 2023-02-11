@@ -6,7 +6,7 @@ export async function gameSchemaValidation(req, res, next){
 
 
     try{
-        if(game.name.length <1 || !game.name){
+        if(!game.name || game.name == ""){
             return res.sendStatus(400);
         }
         if(game.stockTotal <1 || !game.stockTotal){
