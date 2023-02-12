@@ -6,7 +6,7 @@ export async function getCustomers(req, res){
     
     try{
         if(find){
-            const search = await connectionDB.query(`SELECT * FROM customers WHERE cpf ILIKE ($1);`,[`${find}%`])
+            const search = await connectionDB.query(`SELECT * FROM customers WHERE cpf ILIKE ($1);`,[find])
             return res.status(200).send(search.rows);
         }
         const customers = await connectionDB.query(`Select * FROM customers`);
@@ -23,7 +23,7 @@ export async function getCustomersById(req, res){
         const find = Number(req.params.id);
         if(find){
             
-            const search = await connectionDB.query(`SELECT * FROM customers WHERE id=($1);`,[`${find}`])
+            const search = await connectionDB.query(`SELECT * FROM customers WHERE id=($1);`,[find])
             
             if(search.rows.length===0){
                 return res.sendStatus(404);
