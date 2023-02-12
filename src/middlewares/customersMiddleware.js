@@ -3,7 +3,7 @@ import { connectionDB } from "../database/database.js";
 
 export async function customerSchemaValidation(req, res, next){
     const customer = req.body;
-    const { name, phone, cpf, birthday} = customer;
+    const { id,name, phone, cpf, birthday} = customer;
     
 
 
@@ -15,8 +15,11 @@ export async function customerSchemaValidation(req, res, next){
             return res.status(400).send(errors);
         }
         const customerExists = await connectionDB.query(`SELECT cpf FROM customers WHERE cpf = $1;`,[cpf]);
+        const customerExistsID = await connectionDB.query(`SELECT id FROM customers WHERE cpf = $1;`,[cpf]);
         if(customerExists.rowCount > 0){
+          if(id !== customerExistsID){
             return res.status(409).send("Este cliente já existe");
+          }  
         }
         
         res.locals.customer = customer;
