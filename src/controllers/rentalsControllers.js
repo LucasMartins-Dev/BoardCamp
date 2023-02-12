@@ -46,6 +46,9 @@ export async function postRentals(req, res){
     const rental = res.locals.rentalObj;
     const {customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee} = rental;
     try{
+        if(game.rowCount === 0 || customer.rowCount === 0 || game.rows[0].stockTotal <= rentedGames.length){
+            return res.sendStatus(400)
+          }
         await connectionDB.query(`INSERT INTO rentals ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee") VALUES ($1, $2, $3, $4, $5, $6, $7);`,[customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee]);
         return res.sendStatus(201)
     }catch(err){
