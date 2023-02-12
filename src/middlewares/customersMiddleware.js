@@ -3,7 +3,8 @@ import { connectionDB } from "../database/database.js";
 
 export async function customerSchemaValidation(req, res, next){
     const customer = req.body;
-    const { id,name, phone, cpf, birthday} = customer;
+    const {id} = req.params;
+    const { name, phone, cpf, birthday} = customer;
     
 
 
@@ -14,7 +15,15 @@ export async function customerSchemaValidation(req, res, next){
             const errors = error.details.map((detail) => detail.message);
             return res.status(400).send(errors);
         }
-       
+
+        const customerExists = await connectionDB.query(`SELECT cpf FROM customers WHERE cpf = $1;`,[cpf]);
+        
+        if(customerExists.rowCount > 0 && customerExists.rows[0].id !== Number(id)){
+         
+            return res.status(409).send("Este CPF já está cadastrado");
+            
+        }
+
         res.locals.customer = customer;
         next();
         

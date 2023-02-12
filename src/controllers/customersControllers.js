@@ -54,15 +54,8 @@ export async function updateCustomers(req, res){
     const customer = res.locals.customer;
     const {name, phone, cpf, birthday} = customer;
     try{
-        const customerExists = await connectionDB.query(`SELECT cpf FROM customers WHERE cpf = $1;`,[cpf]);
-        
-        if(customerExists.rowCount > 0 && customerExists.rows[0].id !== Number(id)){
-         
-            return res.status(409).send("Este CPF já está cadastrado");
-            
-        }
-        
-
+     
+    
         await connectionDB.query(`UPDATE customers SET name=$1, phone=$2, cpf=$3, birthday=$4 WHERE id=$5`,[`${name}`,phone,cpf,birthday,id])
         return res.sendStatus(200);
     }catch(err){
