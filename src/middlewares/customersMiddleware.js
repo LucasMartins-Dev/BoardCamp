@@ -14,14 +14,7 @@ export async function customerSchemaValidation(req, res, next){
             const errors = error.details.map((detail) => detail.message);
             return res.status(400).send(errors);
         }
-        const customerExists = await connectionDB.query(`SELECT cpf FROM customers WHERE cpf = $1;`,[cpf]);
-        const customerExistsID = await connectionDB.query(`SELECT id FROM customers WHERE cpf = $1;`,[cpf]);
-        if(customerExists.rowCount > 0){
-          if(id !== customerExistsID){
-            return res.status(409).send("Este cliente já existe");
-          }  
-        }
-        
+       
         res.locals.customer = customer;
         next();
         
