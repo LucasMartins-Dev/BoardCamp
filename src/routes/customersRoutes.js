@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { getCustomers, postCustomers, getCustomersById, updateCustomers } from "../controllers/customersControllers.js";
-import { customerSchemaValidation } from "../middlewares/customersMiddlewares.js";
+import { validate } from "../middlewares/validateMiddleware.js";
 
 const route = Router();
 
 route.get("/customers", getCustomers);
 route.get("/customers/:id", getCustomersById);
-route.post("/customers", customerSchemaValidation, postCustomers)
-route.put("/customers/:id", customerSchemaValidation, updateCustomers);
+route.post("/customers", validate, postCustomers)
+route.put("/customers/:id", validate, updateCustomers);
 
 export default route;
