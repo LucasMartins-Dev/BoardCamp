@@ -5,40 +5,35 @@ export async function getRentals(req, res){
     const findCustomer = req.query.customerId;
     const findGame = req.query.gameId;
     try{
-        if(findCustomer){
+       
         const allRentals = await connectionDB.query(`
-        SELECT rentals.*, json_build_object('id',customers.id, 'name', customers.name) 
-        AS customer, json_build_object('id', games.id, 'name', games.name, 'categoryId', games."categoryId", 'categoryName', categories.name) 
-        AS game 
-        FROM rentals 
-        JOIN customers ON "customerId" = customers.id 
-        JOIN games ON "gameId" = games.id
-        JOIN categories ON categories.id = games."categoryId" 
-        WHERE "customerId"=($1);`,[findCustomer])
-            return res.status(200).send(allRentals.rows);
-        }
-        if(findGame){
-            const allRentals = await connectionDB.query(`
-            SELECT rentals.*, json_build_object('id',customers.id, 'name', customers.name) 
-            AS customer, json_build_object('id', games.id, 'name', games.name, 'categoryId', games."categoryId", 'categoryName', categories.name) 
-            AS game 
-            FROM rentals 
-            JOIN customers ON "customerId" = customers.id 
-            JOIN games ON "gameId" = games.id
-            JOIN categories ON categories.id = games."categoryId" 
-            WHERE "gameId"=($1);`,[findGame])
-                return res.status(200).send(allRentals.rows);
-            }
-        const allRentals = await connectionDB.query(`
-        SELECT rentals.*, json_build_object('id',customers.id, 'name', customers.name) 
-        AS customer, json_build_object('id', games.id, 'name', games.name, 'categoryId', games."categoryId", 'categoryName', categories.name) 
-        AS game 
-        FROM rentals 
-        JOIN customers ON "customerId" = customers.id 
-        JOIN games ON "gameId" = games.id
-        JOIN categories ON categories.id = games."categoryId"; 
-        `);
-        return res.status(200).send(allRentals.rows);
+        SELECT json_build_object(
+            'id', rentals.id,
+            'customerId', rentals."customerId",
+            'gameId', rentals."gameId",
+            'rentDate', rentals."rentDate",
+            'daysRented', rentals."daysRented",
+            'returnDate', rentals."returnDate",
+            'originalPrice', rentals."originalPrice",
+            'delayFee', rentals."delayFee",
+            'customer', json_build_object(
+                'id', customers.id,
+                'name', customers.name
+            ),
+            'game', json_build_object(
+                'id', games.id,
+                'name', games.name
+            )
+        )
+        FROM rentals
+        JOIN customers
+            ON rentals."customerId" = customers.id
+        JOIN games
+            ON rentals."gameId" = games.id;
+    `)
+        res.send(allRentals.rows.map((r) => r.json_build_object))
+
+        
     }catch(err){
         console.log(err);
         return res.sendStatus(500);
