@@ -47,13 +47,13 @@ export async function postRentals(req, res){
     const {customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee} = rental;
     try{
         const findC = await connectionDB.query(`SELECT * FROM customers WHERE id = $1;`,[customerId]);
-        if(!findC|| findC.rowCount<1){
+        if(findC == NaN|| findC.rowCount<1){
             
             return res.sendStatus(400);
         }
         const findG = await connectionDB.query(`SELECT * FROM games WHERE id = $1;`,[gameId]);
         
-        if(!findG || findG.rowCount<1){
+        if(!findG == NaN || findG.rowCount<1){
             
             return res.sendStatus(400);
         }
