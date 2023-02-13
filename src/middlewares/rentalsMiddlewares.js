@@ -3,23 +3,20 @@ import { rentalSchema } from "../schemas/rentalsSchema.js";
 import dayjs from "dayjs";
 
 export async function rentalSchemaValidation(req, res, next){
-    const rental = req.body;
-    const { customerId, gameId, daysRented } = rental;
+  
+    const { customerId, gameId, daysRented } =   req.body;
 
 
     try{
 
-        const findC = (await connectionDB.query(`SELECT * FROM customers WHERE id = $1;`,[customerId])).rows;
-        if(!findC){
-            
-            return res.sendStatus(400);
-        }
-        const findG = await connectionDB.query(`SELECT * FROM games WHERE id = $1;`,[gameId]);
-        
-        if(!findG || findG.rowCount<1){
-            
-            return res.sendStatus(400);
-        }
+    const customerExists = await connectionDB.query(`SELECT * FROM customers WHERE id = $1`, [customerId]);
+    const gameExists = await connectionDB.query(`SELECT * FROM games WHERE id = $1`, [gameId]);
+
+    
+
+    if (customerExists.rows.length == 0 || gameExists.rows.length == 0) {
+        return res.sendStatus(400);
+    }
         if(daysRented <1){
         return res.sendStatus(400);
         

@@ -45,23 +45,10 @@ export async function postRentals(req, res){
     const rental = res.locals.rentalObj;
     const {customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee} = rental;
     
-    // Check if customer ID and game ID are valid
-    const customerExists = await connectionDB.query(`SELECT * FROM customers WHERE id = $1`, [customerId]);
-    const gameExists = await connectionDB.query(`SELECT * FROM games WHERE id = $1`, [gameId]);
-
-     // Check if customer ID and game ID are valid
-     const isCustomerIdValid = /^\d+$/.test(customerId);
-     const isGameIdValid = /^\d+$/.test(gameId);
-
+    
     try{
 
-        if (!isCustomerIdValid || !isGameIdValid) {
-            return res.sendStatus(400);
-        }
-
-        if (!customerExists.rows.length || !gameExists.rows.length) {
-            return res.sendStatus(400);
-        }
+       
         await connectionDB.query(`INSERT INTO rentals ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee") VALUES ($1, $2, $3, $4, $5, $6, $7);`,[customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee]);
         return res.sendStatus(201)
     }catch(err){
