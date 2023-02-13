@@ -13,7 +13,7 @@ export async function rentalSchemaValidation(req, res, next){
         const customerExist = await connectionDB.query(`SELECT * FROM customers WHERE id = $1`, [customerId]);
         const gameExist = await connectionDB.query(`SELECT * FROM games WHERE id = $1`, [gameId]);
 
-        if (customerExist.rowCount == 0 || gameExist.rowCount == 0) {
+        if (customerExist.rowCount == 0 && isNaN(customerExist)|| gameExist.rowCount == 0 && isNaN(gameExist)) {
             return res.sendStatus(400);
         }
 
