@@ -16,13 +16,7 @@ export async function customerSchemaValidation(req, res, next){
             return res.status(400).send(errors);
         }
 
-        const customerExists = await connectionDB.query(`SELECT cpf FROM customers WHERE cpf = $1;`,[cpf]);
-        
-        if(customerExists.rowCount > 0 && customerExists.rows[0].id !== Number(id)){
-         
-            return res.status(409).send("Este CPF já está cadastrado");
-            
-        }
+   
 
         res.locals.customer = customer;
         next();
