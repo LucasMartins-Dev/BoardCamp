@@ -1,72 +1,38 @@
-import { connectionDB } from "../database/database.js";
+import { connectionDB   } from "../database/database.js";
 import { rentalSchema } from "../schemas/rentalsSchema.js";
 import dayjs from "dayjs";
 
 export async function rentalSchemaValidation(req, res, next){
   
-    const { customerId, gameId, daysRented } =   req.body;
+    const { customerId, gameId } = req.body;
+  try {
+    const { rowCount: gameCount } = await connectionDB .query(
+      `SELECT * FROM games WHERE id = $1`,
+      [gameId]
+    );
 
+    if (gameCount === 0) return res.sendStatus(400);
 
-    try{
+    const { rowCount: customerCount } = await connectionDB .query(
+      `SELECT * FROM customers WHERE id = $1`,
+      [customerId]
+    );
 
-        const customerDuplicate = await connectionDB.query(`SELECT * FROM customers WHERE id = $1`, [customerId]);
-        const gameDuplicate = await connectionDB.query(`SELECT * FROM games WHERE id = $1`, [gameId]);
+    if (customerCount === 0) return res.sendStatus(400);
 
-        if (!customerDuplicate.rowCount || !gameDuplicate.rowCount) {
-            return res.sendStatus(400);
-        }
+    const game = await connectionDB .query(
+      `SELECT "stockTotal", COUNT(rentals.id) as "rented" FROM games
+       LEFT JOIN rentals ON games.id = rentals."gameId"
+       WHERE games.id = $1
+       GROUP BY games.id`,
+      [gameId]
+    );
 
-        const stockCheck = await connectionDB.query(`SELECT "stockTotal" FROM games WHERE id = $1`, [gameId]);
-        const gameCheck = await connectionDB.query('SELECT * FROM rentals WHERE "gameId" = $1', [gameId])
+    if (!game.rows[0] || game.rows[0].stockTotal <= game.rows[0].rented) return res.sendStatus(400);
 
-        if (stockCheck.rows[0].stockTotal <= gameCheck.rowCount) {
-            return res.status(400).send("Game is out of stock");
-        }
-        if(daysRented <1){
-        return res.sendStatus(400);
-        
-    }
-    const gamesAvailable = (await connectionDB.query(`SELECT "stockTotal" FROM games WHERE id=$1;`,[gameId])).rows[0].stockTotal;
-    console.log(gamesAvailable,"available");
-    
-    const gamesRented = (await connectionDB.query(`SELECT * FROM rentals WHERE "gameId" = $1;`,[gameId])).rows.length;
-    
-    
-    if(gamesRented >= gamesAvailable){
-        return res.sendStatus(400);
-        
-    }
-    
-    const getPrice = (await connectionDB.query(`SELECT "pricePerDay" FROM games WHERE id = $1;`,[gameId])).rows[0].pricePerDay;
-    const rentDate = dayjs().format(`YYYY/MM/DD`);
-    const returnDate = null;
-    const originalPrice = Number(getPrice)*Number(daysRented);
-    const delayFee = null;
-    
-    const rentalObject = {
-        
-        customerId,
-        gameId,
-        rentDate,   
-        daysRented,             
-        returnDate,         
-        originalPrice,       
-        delayFee             
-        
-    }
-    
-    const {error} = rentalSchema.validate(rentalObject, {abortEarly:false});
-    if(error){
-        console.log(findC, "customerrr");
-        
-        const errors = error.details.map((detail) => detail.message);
-        return res.status(400).send(errors);
-    }
-    
-    res.locals.rentalObj = rentalObject;
     next();
-}catch(err){
-    console.log(err);
-    return res.sendStatus(500);
-}
-}
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
