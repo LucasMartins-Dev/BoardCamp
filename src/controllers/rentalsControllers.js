@@ -48,8 +48,8 @@ export async function postRentals(req, res){
     
     try{
 
-        const game = await connectionDB.query(`SELECT * FROM games WHERE id=$1;, [gameId]`)
-        const customer = await connectionDB.query(`SELECT * FROM customers WHERE id=$1;, [customerId]`)
+        const game = await connectionDB.query(`SELECT * FROM games WHERE id=$1;`, [gameId])
+        const customer = await connectionDB.query(`SELECT * FROM customers WHERE id=$1;`, [customerId])
     if(game.rowCount === 0 || customer.rowCount === 0){
           return res.sendStatus(400)
     }
