@@ -47,25 +47,25 @@ export async function postRentals(req, res) {
 
     try {
 
-        const customerDuplicate = await db.query(`SELECT * FROM customers WHERE id = $1`, [customerId]);
-        const gameDuplicate = await db.query(`SELECT * FROM games WHERE id = $1`, [gameId]);
+        const customerDuplicate = await connectionDB.query(`SELECT * FROM customers WHERE id = $1`, [customerId]);
+        const gameDuplicate = await connectionDB.query(`SELECT * FROM games WHERE id = $1`, [gameId]);
 
         if (!customerDuplicate.rowCount || !gameDuplicate.rowCount) {
             return res.sendStatus(400);
         }
 
-        const stockCheck = await db.query(`SELECT "stockTotal" FROM games WHERE id = $1`, [gameId]);
-        const gameCheck = await db.query('SELECT * FROM rentals WHERE "gameId" = $1', [gameId])
+        const stockCheck = await connectionDB.query(`SELECT "stockTotal" FROM games WHERE id = $1`, [gameId]);
+        const gameCheck = await connectionDB.query('SELECT * FROM rentals WHERE "gameId" = $1', [gameId])
 
         if (stockCheck.rows[0].stockTotal <= gameCheck.rowCount) {
             return res.status(400).send("Game is out of stock");
         }
 
-        const rentedGame = await db.query("SELECT * FROM games WHERE id = $1", [gameId]);
+        const rentedGame = await connectionDB.query("SELECT * FROM games WHERE id = $1", [gameId]);
         const { pricePerDay } = rentedGame.rows[0]
         const originalPrice = daysRented * pricePerDay
 
-        await db.query(
+        await connectionDB.query(
             `INSERT INTO rentals 
             ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee")
             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`,
