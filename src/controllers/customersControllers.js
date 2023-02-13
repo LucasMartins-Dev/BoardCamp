@@ -4,7 +4,7 @@ export async function getCustomers(req, res){
   
     try{
       
-        const customers = await connectionDB.query(`Select * FROM customers`);
+        const customers = await connectionDB.query('Select * FROM customers');
         return res.status(200).send(customers.rows);
     }catch(err){
         console.log(err);
@@ -18,12 +18,12 @@ export async function getCustomersById(req, res){
         const find = Number(req.params.id);
         if(find){
             
-            const search = await connectionDB.query(`SELECT * FROM customers WHERE id=($1);`,[find])
+            const search = await connectionDB.query(`SELECT * FROM customers WHERE id= $1;`,[find])
             
-            if(search.rows.length===0){
+            if(search.rowCount === 0){
                 return res.sendStatus(404);
             }
-            return res.status(200).send(search.rows);
+            return res.status(200).send(search.rows[0]);
         }
         
             }catch(err){
