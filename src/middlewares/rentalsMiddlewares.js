@@ -68,6 +68,6 @@ export async function rentalSchemaValidation(req, res, next){
     next();
 }catch(err){
     console.log(err);
-    return res.sendStatus(500);
+    return res.sendStatus(400);
 }
 }
