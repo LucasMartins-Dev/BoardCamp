@@ -37,7 +37,7 @@ export async function postCustomers(req, res){
     try{
         const customerExists = await connectionDB.query(`SELECT cpf FROM customers WHERE cpf = $1;`,[cpf]);
         
-        if(customerExists.rowCount > 0){
+        if(customerExists.rowCount > 0 ){
          
             return res.status(409).send("Este CPF já está cadastrado");
             
@@ -57,7 +57,7 @@ export async function updateCustomers(req, res){
     const {name, phone, cpf, birthday} = customer;
     try{
      
-        const customerExists = await connectionDB.query(`SELECT cpf FROM customers WHERE cpf = $1;`,[cpf]);
+        const customerExists = await connectionDB.query(`SELECT * FROM customers WHERE cpf = $1;`,[cpf]);
         
         if(customerExists.rowCount > 0 && customerExists.rows[0].id !== Number(id)){
          
