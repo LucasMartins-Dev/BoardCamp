@@ -1,14 +1,9 @@
 import { connectionDB } from "../database/database.js";
 
 export async function getCustomers(req, res){
-    const find = req.query.cpf
-
-    
+  
     try{
-        if(find){
-            const search = await connectionDB.query(`SELECT * FROM customers WHERE cpf ILIKE ($1);`,[find])
-            return res.status(200).send(search.rows);
-        }
+      
         const customers = await connectionDB.query(`Select * FROM customers`);
         return res.status(200).send(customers.rows);
     }catch(err){
@@ -40,7 +35,14 @@ export async function postCustomers(req, res){
     const customer = res.locals.customer;
     const {name, phone, cpf, birthday} = customer;
     try{
-     
+        const customerExists = await connectionDB.query(`SELECT cpf FROM customers WHERE cpf = $1;`,[cpf]);
+        
+        if(customerExists.rowCount > 0){
+         
+            return res.status(409).send("Este CPF já está cadastrado");
+            
+        }
+    
         const games = await connectionDB.query(`INSERT INTO customers (name, phone, cpf, birthday) VALUES ($1, $2, $3, $4);`,[name, phone, cpf, birthday]);  
         return res.sendStatus(201);
     }catch(err){
