@@ -43,20 +43,21 @@ export async function getRentals(req, res){
 
 export async function postRentals(req, res){
     const rental = res.locals.rentalObj;
-    let {customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee} = rental;
+    const {customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee} = rental;
+    if (!Number.isInteger(customerId) || customerId <= 0 || !Number.isInteger(gameId) || gameId <= 0) {
+        return res.sendStatus(400);
+    }
     try {
         const customerResult = await connectionDB.query(`SELECT * FROM customers WHERE "customerId" = $1;`, [customerId]);
         if (customerResult.rows.length === 0) {
             return res.sendStatus(400);
         }
-        customerId = customerResult.rows[0].customerId;
-
+       
         const gameResult = await connectionDB.query(`SELECT * FROM games WHERE "gameId" = $1;`, [gameId]);
         if (gameResult.rows.length === 0) {
             return res.sendStatus(400);
         }
-        gameId = gameResult.rows[0].gameId;
-
+    
         await connectionDB.query(`INSERT INTO rentals ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee") VALUES ($1, $2, $3, $4, $5, $6, $7);`,[customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee]);
         return res.sendStatus(201);
     } catch(err) {
@@ -64,6 +65,7 @@ export async function postRentals(req, res){
         return res.sendStatus(500);
     }
 }
+
 
 export async function returnRental(req, res){
     const id = req.params.id;
