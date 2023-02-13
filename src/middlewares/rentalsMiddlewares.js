@@ -9,10 +9,12 @@ export async function rentalSchemaValidation(req, res, next){
 
     try{
 
-        const game = await connectionDB.query(`SELECT * FROM games WHERE id=$1;, [gameId]`)
-        const customer = await connectionDB.query(`SELECT * FROM customers WHERE id=$1;, [customerId]`)
-    if(game.rowCount === 0 || customer.rowCount === 0){
-          return res.sendStatus(400)
+
+        const customerExist = await connectionDB.query(`SELECT * FROM customers WHERE id = $1`, [customerId]);
+        const gameExist = await connectionDB.query(`SELECT * FROM games WHERE id = $1`, [gameId]);
+
+        if (!customerExist.rowCount || !gameExist.rowCount) {
+            return res.sendStatus(400);
         }
 
         const stockCheck = await connectionDB.query(`SELECT "stockTotal" FROM games WHERE id = $1`, [gameId]);
