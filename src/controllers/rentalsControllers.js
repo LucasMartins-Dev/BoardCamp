@@ -41,38 +41,27 @@ export async function getRentals(req, res){
 }
 
 
-export async function postRentals(req, res) {
-    const { customerId, gameId, daysRented } = req.body;
-    const rentalDate = dayjs(Date.now()).format("YYYY-MM-DD");
+export async function postRentals(req, res){
+    const rental = res.locals.rentalObj;
+    const {customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee} = rental;
+    
+    
+    try{
 
-    try {
+       
+    const customerExists = await connectionDB.query(`SELECT * FROM customers WHERE id = $1`, [customerId]);
+    const gameExists = await connectionDB.query(`SELECT * FROM games WHERE id = $1`, [gameId]);
 
-        const customerDuplicate = await connectionDB.query(`SELECT * FROM customers WHERE id = $1`, [customerId]);
-        const gameDuplicate = await connectionDB.query(`SELECT * FROM games WHERE id = $1`, [gameId]);
+    
 
-        if (!customerDuplicate.rowCount || !gameDuplicate.rowCount) {
-            return res.sendStatus(400);
-        }
-
-        const stockCheck = await connectionDB.query(`SELECT "stockTotal" FROM games WHERE id = $1`, [gameId]);
-        const gameCheck = await connectionDB.query('SELECT * FROM rentals WHERE "gameId" = $1', [gameId])
-
-        if (stockCheck.rows[0].stockTotal <= gameCheck.rowCount) {
-            return res.status(400).send("Game is out of stock");
-        }
-
-        const rentedGame = await connectionDB.query("SELECT * FROM games WHERE id = $1", [gameId]);
-        const { pricePerDay } = rentedGame.rows[0]
-        const originalPrice = daysRented * pricePerDay
-
-        await connectionDB.query(
-            `INSERT INTO rentals 
-            ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee")
-            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`,
-            [customerId, gameId, rentalDate, daysRented, null, originalPrice, null])
-        res.status(201).send("Rental added successfully");
-    } catch (error) {
-        res.status(500).send(error.message)
+    if (customerExists.rows.length == 0 || gameExists.rows.length == 0) {
+        return res.sendStatus(400);
+    }
+        await connectionDB.query(`INSERT INTO rentals ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee") VALUES ($1, $2, $3, $4, $5, $6, $7);`,[customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee]);
+        return res.sendStatus(201)
+    }catch(err){
+        console.log(err);
+        return res.sendStatus(500);
     }
 }
 

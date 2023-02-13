@@ -9,14 +9,19 @@ export async function rentalSchemaValidation(req, res, next){
 
     try{
 
-    const customerExists = await connectionDB.query(`SELECT * FROM customers WHERE id = $1`, [customerId]);
-    const gameExists = await connectionDB.query(`SELECT * FROM games WHERE id = $1`, [gameId]);
+        const customerDuplicate = await connectionDB.query(`SELECT * FROM customers WHERE id = $1`, [customerId]);
+        const gameDuplicate = await connectionDB.query(`SELECT * FROM games WHERE id = $1`, [gameId]);
 
-    
+        if (!customerDuplicate.rowCount || !gameDuplicate.rowCount) {
+            return res.sendStatus(400);
+        }
 
-    if (customerExists.rows.length == 0 || gameExists.rows.length == 0) {
-        return res.sendStatus(400);
-    }
+        const stockCheck = await connectionDB.query(`SELECT "stockTotal" FROM games WHERE id = $1`, [gameId]);
+        const gameCheck = await connectionDB.query('SELECT * FROM rentals WHERE "gameId" = $1', [gameId])
+
+        if (stockCheck.rows[0].stockTotal <= gameCheck.rowCount) {
+            return res.status(400).send("Game is out of stock");
+        }
         if(daysRented <1){
         return res.sendStatus(400);
         
