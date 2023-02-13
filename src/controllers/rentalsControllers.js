@@ -48,20 +48,16 @@ export async function postRentals(req, res){
     
     try{
 
-       
-    const customerExists = await connectionDB.query(`SELECT * FROM customers WHERE id = $1`, [customerId]);
-    const gameExists = await connectionDB.query(`SELECT * FROM games WHERE id = $1`, [gameId]);
-
-    
-
-    if (customerExists.rows.length == 0 || gameExists.rows.length == 0) {
-        return res.sendStatus(400);
+        const game = await connectionDB.query(`SELECT * FROM games WHERE id=$1;, [gameId]`)
+        const customer = await connectionDB.query(`SELECT * FROM customers WHERE id=$1;, [customerId]`)
+    if(game.rowCount === 0 || customer.rowCount === 0){
+          return res.sendStatus(400)
     }
         await connectionDB.query(`INSERT INTO rentals ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee") VALUES ($1, $2, $3, $4, $5, $6, $7);`,[customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee]);
         return res.sendStatus(201)
     }catch(err){
         console.log(err);
-        return res.sendStatus(400);
+        return res.sendStatus(500);
     }
 }
 

@@ -9,11 +9,10 @@ export async function rentalSchemaValidation(req, res, next){
 
     try{
 
-        const customerDuplicate = await connectionDB.query(`SELECT * FROM customers WHERE id = $1`, [customerId]);
-        const gameDuplicate = await connectionDB.query(`SELECT * FROM games WHERE id = $1`, [gameId]);
-
-        if (!customerDuplicate.rowCount || !gameDuplicate.rowCount) {
-            return res.sendStatus(400);
+        const game = await connectionDB.query(`SELECT * FROM games WHERE id=$1;, [gameId]`)
+        const customer = await connectionDB.query(`SELECT * FROM customers WHERE id=$1;, [customerId]`)
+    if(game.rowCount === 0 || customer.rowCount === 0){
+          return res.sendStatus(400)
         }
 
         const stockCheck = await connectionDB.query(`SELECT "stockTotal" FROM games WHERE id = $1`, [gameId]);
@@ -67,6 +66,6 @@ export async function rentalSchemaValidation(req, res, next){
     next();
 }catch(err){
     console.log(err);
-    return res.sendStatus(400);
+    return res.sendStatus(500);
 }
 }
