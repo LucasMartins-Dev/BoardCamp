@@ -42,8 +42,8 @@ export async function getRentals(req, res){
 
 
 export async function postRentals(req, res){
-    
-    const {customerId, gameId, daysRented} = req.body;
+    const rental = res.locals.rentalObj;
+    const {customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee} = rental;
     
     
     try{
